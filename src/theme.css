@@ -1,0 +1,7 @@
+/* Brand colours of the prototype; everything else comes from Ionic's defaults. */
+:root {
+  --ion-color-primary: #1f2937;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-secondary: #c8a24a;
+  --ion-color-secondary-contrast: #1f2937;
+}
