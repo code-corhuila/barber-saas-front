@@ -1,0 +1,19 @@
+# The web build of the shell, for development and review in a browser. The installed app does
+# not use this container: Capacitor packages the same build inside the Android/iOS app (ADR-013).
+# expose, not ports: only the gateway is published to the host (norm 5.6.1).
+services:
+  front:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    expose: ["80"]
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+    networks: [platform]
+
+networks:
+  platform:
+    name: platform
+    external: true
