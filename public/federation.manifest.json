@@ -1,0 +1,6 @@
+{
+  "identity-auth": "http://localhost:4301/remoteEntry.json",
+  "barbershop": "http://localhost:4302/remoteEntry.json",
+  "schedule": "http://localhost:4303/remoteEntry.json",
+  "appointment": "http://localhost:4304/remoteEntry.json"
+}
