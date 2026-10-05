@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Packages the hybrid app for Android (ADR-013): builds the shell and every domain app of
 // public/federation.manifest.json, copies each domain app INTO the shell build so the APK does not
-// depend on localhost dev servers, writes a manifest with relative addresses and the gateway
+// depend on localhost dev servers, writes a manifest with root-relative addresses and the gateway
 // address, and syncs the result into the Android project.
 //
 // usage: npm run android:package [-- --gateway http://10.0.2.2:8000] [--apps ..]
@@ -46,7 +46,9 @@ for (const name of Object.keys(remotes)) {
   const target = join(web, 'remotes', name);
   rmSync(target, { recursive: true, force: true });
   cpSync(join(folder, 'dist', name), target, { recursive: true });
-  packaged[name] = `remotes/${name}/remoteEntry.json`;
+  // Root-relative: Native Federation fetches this and import()s the files next to it, and import()
+  // refuses a bare 'remotes/...' specifier. '/' is the shell's origin in a browser and in the APK.
+  packaged[name] = `/remotes/${name}/remoteEntry.json`;
 }
 writeFileSync(join(web, 'federation.manifest.json'), JSON.stringify(packaged, null, 2) + '\n');
 
