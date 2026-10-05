@@ -55,6 +55,9 @@ capacitor.config.ts                        the native app
    `idempotencyKey` on creations). Never `fetch` or `axios` against `/api/`.
 3. Read the user from `context.session`; never store a token. Use a memory router with
    `context.initialPath`, and `context.navigate('/...')` to leave your domain.
+   Before a tenant-scoped request for a barbershop the user picked, `await
+   context.session.enterBarbershop(barbershopId)`: a client gets a token bound to it (DEC-AUTH-06)
+   and `context.api` sends it from then on; staff resolve at once.
 4. Show `error.userMessage` on screen: the shell already decided it.
 5. Your dev server port: identity-auth 4301, barbershop 4302, schedule 4303, appointment 4304
    (`public/federation.manifest.json`). Adding a new entry or route is a small pull request
