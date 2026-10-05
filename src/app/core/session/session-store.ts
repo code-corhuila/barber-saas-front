@@ -18,11 +18,19 @@ export interface AuthResponse {
   user: SessionUser;
 }
 
+/** A client's token bound to the barbershop they picked (auth-service.yaml DEC-AUTH-06). */
+export interface BarbershopBinding {
+  barbershopId: string;
+  accessToken: string;
+  expiresAt: number;
+}
+
 export interface Session {
   accessToken: string;
   refreshToken: string;
   expiresAt: number;
   user: SessionUser;
+  barbershop?: BarbershopBinding;
 }
 
 type Listener = (session: Session | null) => void;
@@ -49,8 +57,35 @@ export class SessionStore {
     return this.current;
   }
 
+  /** The bound token while it is valid, else the login token: the one every request carries. */
   token(): string | null {
-    return this.get()?.accessToken ?? null;
+    const session = this.get();
+    return this.binding()?.accessToken ?? session?.accessToken ?? null;
+  }
+
+  /** Staff: their own barbershop. Client: the one they entered, while its token is valid. */
+  barbershopId(): string | null {
+    return this.get()?.user.barbershopId ?? this.binding()?.barbershopId ?? null;
+  }
+
+  /** The client's valid binding, or null once it expired (the login token is sent again). */
+  binding(): BarbershopBinding | null {
+    const bound = this.get()?.barbershop;
+    return bound && bound.expiresAt > this.now() ? bound : null;
+  }
+
+  /** True when the client is bound to that barbershop for at least `marginMs` more. */
+  boundTo(barbershopId: string, marginMs = 0): boolean {
+    const bound = this.binding();
+    return !!bound && bound.barbershopId === barbershopId && bound.expiresAt - marginMs > this.now();
+  }
+
+  bindBarbershop(barbershopId: string, accessToken: string, expiresIn: number): void {
+    const session = this.get();
+    if (!session) return;
+    const next: Session = { ...session, barbershop: { barbershopId, accessToken, expiresAt: this.now() + expiresIn * 1000 } };
+    this.storage?.setItem(KEY, JSON.stringify(next));
+    this.set(next);
   }
 
   signIn(auth: AuthResponse): Session {
