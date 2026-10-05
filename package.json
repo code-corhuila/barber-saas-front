@@ -5,16 +5,18 @@
   "scripts": {
     "start": "ng serve",
     "build": "ng build",
-    "test": "vitest run"
+    "test": "vitest run",
+    "android:package": "node scripts/package-android.mjs"
   },
   "dependencies": {
+    "@angular-architects/native-federation": "~21.2.6",
     "@angular/common": "~21.2.25",
     "@angular/compiler": "~21.2.25",
     "@angular/core": "~21.2.25",
     "@angular/forms": "~21.2.25",
     "@angular/platform-browser": "~21.2.25",
     "@angular/router": "~21.2.25",
-    "@angular-architects/native-federation": "~21.2.6",
+    "@capacitor/android": "~7.6.9",
     "@capacitor/core": "~7.6.9",
     "@ionic/angular": "~8.8.19",
     "es-module-shims": "^1.10.0",
