@@ -44,3 +44,41 @@ describe('SessionStore', () => {
     expect(seen).toEqual(['u-1', null]);
   });
 });
+
+describe('SessionStore, a client bound to a barbershop (DEC-AUTH-06)', () => {
+  it('sends the bound token while it is valid and the login token after it expires', () => {
+    let now = 0;
+    const store = new SessionStore(memoryStorage(), () => now);
+    store.signIn({ ...auth, expiresIn: 86_400 });
+    store.bindBarbershop('shop-1', 'bound', 3600);
+
+    expect(store.token()).toBe('bound');
+    expect(store.barbershopId()).toBe('shop-1');
+
+    now = 3_601_000;
+    expect(store.token()).toBe('access');
+    expect(store.barbershopId()).toBeNull();
+  });
+
+  it('keeps the binding across reloads and drops it on a new sign-in or sign-out', () => {
+    const storage = memoryStorage();
+    const store = new SessionStore(storage, () => 0);
+    store.signIn({ ...auth, expiresIn: 86_400 });
+    store.bindBarbershop('shop-1', 'bound', 3600);
+
+    expect(new SessionStore(storage, () => 0).token()).toBe('bound');
+
+    store.signIn({ ...auth, expiresIn: 86_400 });
+    expect(store.barbershopId()).toBeNull();
+    store.bindBarbershop('shop-1', 'bound', 3600);
+    store.clear();
+    expect(store.token()).toBeNull();
+  });
+
+  it('gives staff the barbershop of their own account', () => {
+    const store = new SessionStore(memoryStorage(), () => 0);
+    store.signIn({ ...auth, user: { ...auth.user, role: 'BARBER', barbershopId: 'shop-9' } });
+
+    expect(store.barbershopId()).toBe('shop-9');
+  });
+});
