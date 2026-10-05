@@ -4,6 +4,7 @@ import { loadRemoteModule } from '@angular-architects/native-federation';
 import { IonButton, IonSpinner } from '@ionic/angular/standalone';
 import { apiClient } from '../http/api-client';
 import { sessionStore } from '../session/session-store';
+import { enterBarbershop } from '../session/enter-barbershop';
 import { MountContext, MountFunction, Unmount } from './mount-contract';
 
 /**
@@ -73,6 +74,8 @@ export class ReactRemoteHostComponent implements AfterViewInit, OnDestroy {
         signIn: (auth) => sessionStore.signIn(auth),
         signOut: () => sessionStore.clear(),
         subscribe: (listener) => sessionStore.subscribe((s) => listener(s?.user ?? null)),
+        enterBarbershop: (barbershopId) => enterBarbershop(sessionStore, apiClient, barbershopId),
+        barbershopId: () => sessionStore.barbershopId(),
       },
       basePath,
       initialPath: full.startsWith(basePath) ? full.slice(basePath.length) || '/' : '/',
