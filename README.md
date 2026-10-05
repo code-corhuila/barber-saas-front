@@ -69,10 +69,21 @@ capacitor.config.ts                        the native app
 npm ci
 npm start                     # http://localhost:4200 — the gateway must be up at :8000
 npm run build                 # dist/shell/browser
-npx cap add android           # once, with the Android SDK installed; then: npx cap sync android
 ```
 
-On a phone the gateway is not `localhost`: set `localStorage['barbersaas.gatewayUrl']`.
+**The Android app (emulator).** The domain apps go inside the APK, not on localhost dev servers:
+
+```bash
+# clone the four domain apps next to this repository (barber-saas-<domain>-app or <domain>-app)
+npm run android:package       # builds the shell and every domain app, copies them into the build,
+                              # writes the gateway address and runs npx cap sync android
+npx cap open android          # Android Studio: run it on an emulator
+```
+
+The emulator reaches the platform on the PC at `http://10.0.2.2:8000` (the default). For a phone on
+the same Wi-Fi: `npm run android:package -- --gateway http://<PC IP>:8000`; the device can still
+override it in `localStorage['barbersaas.gatewayUrl']`. The app's origin is `http://localhost`, the
+one the gateway allows for Android (`androidScheme: 'http'` in `capacitor.config.ts`).
 
 ### Where the data is
 
@@ -86,5 +97,5 @@ CI runs `npm ci`, `npm test` and `npm run build`.
 
 ### What is missing
 
-The Android/iOS projects (`npx cap add`), copying each domain app into the packaged build, and the
-Ionic Angular domain apps of phase 2.
+The iOS project, a signed release build pointing at an HTTPS gateway, and the Ionic Angular domain
+apps of phase 2.
