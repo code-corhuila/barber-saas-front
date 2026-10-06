@@ -1,48 +1,65 @@
 import { Component, computed, inject } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
-import { IonApp, IonButton, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { IonApp, IonContent, IonFooter, IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { calendar, cut, logOut, person, search, time } from 'ionicons/icons';
+import { filter, map } from 'rxjs';
 import { SessionService } from './core/auth/session.service';
-import { NAVIGATION } from './layout/navigation';
+import { tabsFor } from './layout/navigation';
 
-/** The frame of the app: title bar, the sections the user's role may open, and the domain area. */
+/**
+ * The frame of the app, as in the prototype: the bottom tabs of the user's role under the domain
+ * area, whose screens carry their own titles. Signed out, the screens use the whole page.
+ */
 @Component({
   selector: 'app-root',
-  imports: [IonApp, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, RouterOutlet, RouterLink],
+  imports: [IonApp, IonContent, IonFooter, IonIcon, RouterOutlet, RouterLink, RouterLinkActive],
   template: `
     <ion-app>
-      <ion-header>
-        <ion-toolbar color="primary">
-          <ion-title><a routerLink="/" class="brand">BarberSaaS</a></ion-title>
-          <ion-buttons slot="end">
-            @for (item of sections(); track item.path) {
-              <ion-button [routerLink]="item.path">{{ item.label }}</ion-button>
-            }
-            @if (session.signedIn()) {
-              <ion-button (click)="signOut()">Salir</ion-button>
-            } @else {
-              <ion-button routerLink="/sign-in">Ingresar</ion-button>
-            }
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content>
+      <ion-content [class.framed]="framed()">
         <main><router-outlet /></main>
       </ion-content>
+      @if (framed()) {
+        <ion-footer class="ion-no-border">
+          <nav class="tabs" aria-label="Secciones">
+            @for (tab of tabs(); track tab.label) {
+              <a class="tab" [routerLink]="tab.path" routerLinkActive="active" ariaCurrentWhenActive="page">
+                <ion-icon [name]="tab.icon" aria-hidden="true" />
+                <span>{{ tab.label }}</span>
+              </a>
+            }
+          </nav>
+        </ion-footer>
+      }
     </ion-app>
   `,
-  styles: `.brand { color: inherit; text-decoration: none; }`,
+  styles: `
+    /* The domain apps pin their action bar (e.g. "Continuar") with position: fixed; bottom: 0. A
+       transform makes ion-content their containing block, so the bar sits above the tabs. */
+    ion-content.framed { transform: translateZ(0); }
+    .tabs { display: flex; background: var(--bs-bg); border-top: 1px solid var(--bs-border);
+            padding-bottom: env(safe-area-inset-bottom); }
+    .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0 8px;
+           color: var(--bs-muted); text-decoration: none; font-size: 11px; }
+    .tab ion-icon { font-size: 24px; }
+    .tab.active { color: var(--bs-gold); }
+  `,
 })
 export class AppComponent {
   readonly session = inject(SessionService);
   private readonly router = inject(Router);
 
-  readonly sections = computed(() => {
-    const role = this.session.user()?.role;
-    return role ? NAVIGATION.filter((item) => item.roles.includes(role)) : [];
-  });
+  private readonly url = toSignal(
+    this.router.events.pipe(filter((e) => e instanceof NavigationEnd), map((e) => e.urlAfterRedirects)),
+    { initialValue: this.router.url },
+  );
 
-  signOut(): void {
-    this.session.signOut();
-    void this.router.navigateByUrl('/sign-in');
+  readonly tabs = computed(() => tabsFor(this.session.user()?.role));
+  /** The tabs show only to a signed-in user outside the sign-in screens. */
+  readonly framed = computed(() => this.session.signedIn() && !this.url().startsWith('/sign-in'));
+
+  constructor() {
+    addIcons({ calendar, cut, logOut, person, search, time });
   }
 }
