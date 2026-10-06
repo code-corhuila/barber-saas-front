@@ -14,6 +14,10 @@ const config: CapacitorConfig = {
     // A qa or main build points at an HTTPS gateway and needs no cleartext.
     cleartext: true,
   },
+  android: {
+    // Android 15+ draws the app under the status and gesture bars; keep the web content clear of them.
+    adjustMarginsForEdgeToEdge: 'auto',
+  },
 };
 
 export default config;
