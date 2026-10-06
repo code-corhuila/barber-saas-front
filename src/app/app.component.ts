@@ -6,6 +6,7 @@ import { addIcons } from 'ionicons';
 import { calendar, cut, logOut, person, search, time } from 'ionicons/icons';
 import { filter, map } from 'rxjs';
 import { SessionService } from './core/auth/session.service';
+import { listenToBackButton } from './core/native/back-button';
 import { tabsFor } from './layout/navigation';
 
 /**
@@ -61,5 +62,6 @@ export class AppComponent {
 
   constructor() {
     addIcons({ calendar, cut, logOut, person, search, time });
+    listenToBackButton();
   }
 }
