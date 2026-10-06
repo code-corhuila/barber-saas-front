@@ -3,9 +3,8 @@ import { Router } from '@angular/router';
 import { loadRemoteModule } from '@angular-architects/native-federation';
 import { IonButton, IonSpinner } from '@ionic/angular/standalone';
 import { apiClient } from '../http/api-client';
-import { sessionStore } from '../session/session-store';
-import { enterBarbershop } from '../session/enter-barbershop';
 import { MountContext, MountFunction, Unmount } from './mount-contract';
+import { shellSession } from './shell-context';
 
 /**
  * Hosts one Ionic React domain app inside the Angular shell (ADR-013). It loads the remote's
@@ -69,14 +68,7 @@ export class ReactRemoteHostComponent implements AfterViewInit, OnDestroy {
     const full = this.router.url.split('?')[0] ?? '';
     return {
       api: apiClient,
-      session: {
-        user: () => sessionStore.get()?.user ?? null,
-        signIn: (auth) => sessionStore.signIn(auth),
-        signOut: () => sessionStore.clear(),
-        subscribe: (listener) => sessionStore.subscribe((s) => listener(s?.user ?? null)),
-        enterBarbershop: (barbershopId) => enterBarbershop(sessionStore, apiClient, barbershopId),
-        barbershopId: () => sessionStore.barbershopId(),
-      },
+      session: shellSession(),
       basePath,
       initialPath: full.startsWith(basePath) ? full.slice(basePath.length) || '/' : '/',
       navigate: (path) => void this.router.navigateByUrl(path),
