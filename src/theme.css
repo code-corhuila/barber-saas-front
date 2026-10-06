@@ -1,7 +1,27 @@
-/* Brand colours of the prototype; everything else comes from Ionic's defaults. */
+/* The prototype's look: dark background, cards a shade lighter, gold accent. The domain apps use
+   the same values; --bs-* are the shell's names for them. */
 :root {
-  --ion-color-primary: #1f2937;
-  --ion-color-primary-contrast: #ffffff;
-  --ion-color-secondary: #c8a24a;
-  --ion-color-secondary-contrast: #1f2937;
+  --bs-bg: #121212;
+  --bs-card: #1e1e1e;
+  --bs-border: #2a2a2a;
+  --bs-gold: #d4af37;
+  --bs-text: #ffffff;
+  --bs-muted: #888888;
+  --bs-danger: #ff6b6b;
+
+  --ion-background-color: var(--bs-bg);
+  --ion-text-color: var(--bs-text);
+  --ion-toolbar-background: var(--bs-bg);
+  --ion-toolbar-color: var(--bs-text);
+  --ion-color-primary: #d4af37;
+  --ion-color-primary-rgb: 212, 175, 55;
+  --ion-color-primary-contrast: #121212;
+  --ion-color-primary-contrast-rgb: 18, 18, 18;
+  --ion-color-primary-shade: #bb9a30;
+  --ion-color-primary-tint: #d8b74b;
+  --ion-color-danger: #ff6b6b;
+  color-scheme: dark;
 }
+
+body { background: var(--bs-bg); color: var(--bs-text); }
+main { min-height: 100%; }
