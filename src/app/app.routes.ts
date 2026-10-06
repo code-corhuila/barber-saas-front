@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/auth/auth.guard';
+import { authGuard, welcomeGuard } from './core/auth/auth.guard';
 import { ReactRemoteHostComponent } from './core/remotes/react-remote-host.component';
 
 /**
@@ -22,8 +22,10 @@ function reactDomain(path: string, remote: string, title: string, guarded = true
 }
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', title: 'Inicio', loadComponent: () =>
+  { path: '', pathMatch: 'full', title: 'Inicio', canActivate: [welcomeGuard], loadComponent: () =>
       import('./layout/home.component').then((m) => m.HomeComponent) },
+  { path: 'profile', title: 'Perfil', canActivate: [authGuard], loadComponent: () =>
+      import('./layout/profile.component').then((m) => m.ProfileComponent) },
   reactDomain('sign-in', 'identity-auth', 'Ingresar', false),
   reactDomain('barbershops', 'barbershop', 'Barberías'),
   reactDomain('schedule', 'schedule', 'Horarios'),
