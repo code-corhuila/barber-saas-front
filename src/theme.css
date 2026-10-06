@@ -25,3 +25,7 @@
 
 body { background: var(--bs-bg); color: var(--bs-text); }
 main { min-height: 100%; }
+
+/* Ionic's Material mode writes buttons and segments in capitals; the prototype writes them as
+   sentences ("Crear cuenta"). The domain apps render inside the shell, so this reaches them too. */
+ion-button, ion-segment-button { text-transform: none; letter-spacing: normal; }
