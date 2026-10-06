@@ -1,6 +1,10 @@
+import { loadRemoteModule } from '@angular-architects/native-federation';
 import { Routes } from '@angular/router';
-import { authGuard, welcomeGuard } from './core/auth/auth.guard';
+import { authGuard, roleGuard, welcomeGuard } from './core/auth/auth.guard';
+import { remoteUnavailable } from './core/errors/remote-unavailable.component';
 import { ReactRemoteHostComponent } from './core/remotes/react-remote-host.component';
+import { shellContextResolver } from './core/remotes/shell-context';
+import type { SessionUser } from './core/session/session-store';
 
 /**
  * One entry per domain app. An Ionic React domain app is mounted by ReactRemoteHostComponent;
@@ -21,6 +25,22 @@ function reactDomain(path: string, remote: string, title: string, guarded = true
   };
 }
 
+/**
+ * An Ionic Angular domain app: its './routes' run in the shell's injector, with the shell's
+ * HttpClient, and get the session as `data.shell` (ShellContext). Only the given roles open it.
+ */
+function angularDomain(path: string, remote: string, title: string, roles: SessionUser['role'][]): Routes[number] {
+  return {
+    path,
+    title,
+    canActivate: [authGuard, roleGuard(...roles)],
+    resolve: { shell: shellContextResolver },
+    loadChildren: () => loadRemoteModule(remote, './routes')
+      .then((m: { routes: Routes }) => m.routes)
+      .catch((err: unknown) => remoteUnavailable(title, err)),
+  };
+}
+
 export const routes: Routes = [
   { path: '', pathMatch: 'full', title: 'Inicio', canActivate: [welcomeGuard], loadComponent: () =>
       import('./layout/home.component').then((m) => m.HomeComponent) },
@@ -30,6 +50,7 @@ export const routes: Routes = [
   reactDomain('barbershops', 'barbershop', 'Barberías'),
   reactDomain('schedule', 'schedule', 'Horarios'),
   reactDomain('appointments', 'appointment', 'Citas'),
+  angularDomain('platform', 'platform-admin', 'Plataforma', ['SUPER_ADMIN']),
   { path: '**', title: 'Página no encontrada', loadComponent: () =>
       import('./layout/not-found.component').then((m) => m.NotFoundComponent) },
 ];
