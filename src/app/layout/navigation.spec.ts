@@ -15,6 +15,6 @@ describe('navigation', () => {
   it('lands each role on its first tab', () => {
     expect(homeFor('CLIENT')).toBe('/barbershops');
     expect(homeFor('BARBER')).toBe('/appointments');
-    expect(homeFor('SUPER_ADMIN')).toBe('/profile');
+    expect(homeFor('SUPER_ADMIN')).toBe('/platform');
   });
 });
