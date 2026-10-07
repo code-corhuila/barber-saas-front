@@ -29,7 +29,7 @@ jobs:
           if [ -n "$bad" ]; then
             echo "::error::These files must never be committed (secrets policy):"; echo "$bad"; exit 1
           fi
-          if git grep -nE '"private_key"|BEGIN (RSA |EC )?PRIVATE KEY' -- . ':!*.md'; then
+          if git grep -lE '"private_key"|BEGIN (RSA |EC )?PRIVATE KEY' -- . ':!*.md' ':!.github/workflows'; then
             echo "::error::A private key is committed (secrets policy)"; exit 1
           fi
       - uses: actions/setup-node@v4
