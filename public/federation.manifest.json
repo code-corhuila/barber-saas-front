@@ -3,5 +3,6 @@
   "barbershop": "http://localhost:4302/remoteEntry.json",
   "schedule": "http://localhost:4303/remoteEntry.json",
   "appointment": "http://localhost:4304/remoteEntry.json",
-  "platform-admin": "http://localhost:4308/remoteEntry.json"
+  "platform-admin": "http://localhost:4308/remoteEntry.json",
+  "notifications": "http://localhost:4305/remoteEntry.json"
 }
