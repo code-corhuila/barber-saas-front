@@ -1,13 +1,13 @@
 import { Component, computed, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { IonIcon } from '@ionic/angular/standalone';
 import { SessionService } from '../core/auth/session.service';
-import { ROLE_BADGE } from './navigation';
+import { profileLinksFor, ROLE_BADGE } from './navigation';
 
-/** The prototype's profile tab: the user's initial, name, email and role, and signing out. */
+/** The prototype's profile tab: the user's initial, name, email and role, the role's sections and signing out. */
 @Component({
   selector: 'bs-profile',
-  imports: [IonIcon],
+  imports: [IonIcon, RouterLink],
   template: `
     @if (session.user(); as user) {
       <header class="header">
@@ -17,6 +17,11 @@ import { ROLE_BADGE } from './navigation';
         <span class="badge" [style.color]="badge().color" [style.border-color]="badge().color">{{ badge().label }}</span>
       </header>
       <section class="content">
+        @for (link of links(); track link.path) {
+          <a class="row" [routerLink]="link.path">
+            <ion-icon [name]="link.icon" aria-hidden="true" /> {{ link.label }}
+          </a>
+        }
         <button type="button" class="row danger" (click)="signOut()">
           <ion-icon name="log-out" aria-hidden="true" /> Cerrar sesión
         </button>
@@ -36,7 +41,8 @@ import { ROLE_BADGE } from './navigation';
     .content { padding: 20px 16px 16px; max-width: 40rem; margin: 0 auto; }
     .row { width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px 16px;
            background: var(--bs-card); border: 1px solid var(--bs-border); border-radius: 10px; font: inherit;
-           font-size: 14px; font-weight: 600; color: var(--bs-text); cursor: pointer; }
+           font-size: 14px; font-weight: 600; color: var(--bs-text); cursor: pointer; text-decoration: none;
+           margin-bottom: 10px; }
     .row ion-icon { font-size: 20px; }
     .row.danger { border-color: #3a1e1e; color: var(--bs-danger); }
   `,
@@ -45,6 +51,7 @@ export class ProfileComponent {
   readonly session = inject(SessionService);
   private readonly router = inject(Router);
   readonly badge = computed(() => ROLE_BADGE[this.session.user()?.role ?? 'CLIENT']);
+  readonly links = computed(() => profileLinksFor(this.session.user()?.role));
 
   signOut(): void {
     this.session.signOut();

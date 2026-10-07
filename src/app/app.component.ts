@@ -3,7 +3,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { IonApp, IonContent, IonFooter, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { business, calendar, cut, logOut, notifications, person, search, statsChart, time } from 'ionicons/icons';
+import {
+  business, calendar, cut, gift, heart, logOut, notifications, person, search, statsChart, time,
+} from 'ionicons/icons';
 import { filter, map } from 'rxjs';
 import { SessionService } from './core/auth/session.service';
 import { listenToBackButton } from './core/native/back-button';
@@ -61,7 +63,9 @@ export class AppComponent {
   readonly framed = computed(() => this.session.signedIn() && !this.url().startsWith('/sign-in'));
 
   constructor() {
-    addIcons({ business, calendar, cut, logOut, notifications, person, search, 'stats-chart': statsChart, time });
+    addIcons({
+      business, calendar, cut, gift, heart, logOut, notifications, person, search, 'stats-chart': statsChart, time,
+    });
     listenToBackButton();
   }
 }
