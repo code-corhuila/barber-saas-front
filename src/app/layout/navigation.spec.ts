@@ -5,7 +5,7 @@ describe('navigation', () => {
   it('gives each role the prototype tabs, profile last', () => {
     expect(tabsFor('CLIENT').map((t) => t.label)).toEqual(['Buscar', 'Mis citas', 'Avisos', 'Perfil']);
     expect(tabsFor('BARBER').map((t) => t.label)).toEqual(['Mi agenda', 'Horarios', 'Avisos', 'Perfil']);
-    expect(tabsFor('ADMIN_BARBERSHOP').map((t) => t.label)).toEqual(['Agenda', 'Mi barbería', 'Horarios', 'Avisos', 'Perfil']);
+    expect(tabsFor('ADMIN_BARBERSHOP').map((t) => t.label)).toEqual(['Agenda', 'Mi barbería', 'Horarios', 'Finanzas', 'Avisos', 'Perfil']);
     expect(tabsFor('SUPER_ADMIN').map((t) => t.label)).toEqual(['Plataforma', 'Avisos', 'Perfil']);
   });
 
