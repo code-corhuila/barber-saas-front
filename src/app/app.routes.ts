@@ -52,6 +52,7 @@ export const routes: Routes = [
   reactDomain('appointments', 'appointment', 'Citas'),
   angularDomain('platform', 'platform-admin', 'Plataforma', ['SUPER_ADMIN']),
   angularDomain('finance', 'finance-inventory', 'Finanzas', ['ADMIN_BARBERSHOP']),
+  angularDomain('loyalty', 'loyalty', 'Fidelidad', ['CLIENT', 'BARBER', 'ADMIN_BARBERSHOP']),
   angularDomain('notifications', 'notifications', 'Notificaciones', ['CLIENT', 'BARBER', 'ADMIN_BARBERSHOP', 'SUPER_ADMIN']),
   { path: '**', title: 'Página no encontrada', loadComponent: () =>
       import('./layout/not-found.component').then((m) => m.NotFoundComponent) },
