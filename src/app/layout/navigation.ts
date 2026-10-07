@@ -21,6 +21,7 @@ export const NAVIGATION: NavigationItem[] = [
   { path: '/appointments', label: 'Agenda', icon: 'calendar', roles: ['ADMIN_BARBERSHOP'] },
   { path: '/barbershops', label: 'Mi barbería', icon: 'cut', roles: ['ADMIN_BARBERSHOP'] },
   { path: '/schedule', label: 'Horarios', icon: 'time', roles: ['BARBER', 'ADMIN_BARBERSHOP'] },
+  { path: '/finance', label: 'Finanzas', icon: 'stats-chart', roles: ['ADMIN_BARBERSHOP'] },
   { path: '/platform', label: 'Plataforma', icon: 'business', roles: ['SUPER_ADMIN'] },
   { path: '/notifications', label: 'Avisos', icon: 'notifications', roles: ['CLIENT', 'BARBER', 'ADMIN_BARBERSHOP', 'SUPER_ADMIN'] },
   { path: '/profile', label: 'Perfil', icon: 'person', roles: ['CLIENT', 'BARBER', 'ADMIN_BARBERSHOP', 'SUPER_ADMIN'] },
