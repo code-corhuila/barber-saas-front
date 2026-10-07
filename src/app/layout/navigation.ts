@@ -17,6 +17,7 @@ export interface NavigationItem {
 export const NAVIGATION: NavigationItem[] = [
   { path: '/barbershops', label: 'Buscar', icon: 'search', roles: ['CLIENT'] },
   { path: '/appointments', label: 'Mis citas', icon: 'calendar', roles: ['CLIENT'] },
+  { path: '/loyalty', label: 'Fidelidad', icon: 'gift', roles: ['CLIENT'] },
   { path: '/appointments', label: 'Mi agenda', icon: 'calendar', roles: ['BARBER'] },
   { path: '/appointments', label: 'Agenda', icon: 'calendar', roles: ['ADMIN_BARBERSHOP'] },
   { path: '/barbershops', label: 'Mi barbería', icon: 'cut', roles: ['ADMIN_BARBERSHOP'] },
@@ -26,6 +27,18 @@ export const NAVIGATION: NavigationItem[] = [
   { path: '/notifications', label: 'Avisos', icon: 'notifications', roles: ['CLIENT', 'BARBER', 'ADMIN_BARBERSHOP', 'SUPER_ADMIN'] },
   { path: '/profile', label: 'Perfil', icon: 'person', roles: ['CLIENT', 'BARBER', 'ADMIN_BARBERSHOP', 'SUPER_ADMIN'] },
 ];
+
+/**
+ * Sections reached from the profile, as in the prototype (the owner's "Programa de fidelidad" lived
+ * in their profile, not in a tab), so the bottom bar keeps room on a phone.
+ */
+export const PROFILE_LINKS: NavigationItem[] = [
+  { path: '/loyalty', label: 'Programa de fidelidad', icon: 'heart', roles: ['ADMIN_BARBERSHOP'] },
+];
+
+export function profileLinksFor(role: Role | undefined): NavigationItem[] {
+  return role ? PROFILE_LINKS.filter((item) => item.roles.includes(role)) : [];
+}
 
 export function tabsFor(role: Role | undefined): NavigationItem[] {
   return role ? NAVIGATION.filter((item) => item.roles.includes(role)) : [];
