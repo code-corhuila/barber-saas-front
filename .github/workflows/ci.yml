@@ -21,6 +21,17 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      # Firebase files and keys belong to each developer's own account and are never versioned, not
+      # even forced past .gitignore with `git add -f`: a pull request that carries one fails here.
+      - name: No Firebase files, keys or env files
+        run: |
+          bad=$(git ls-files | grep -iE '(^|/)(google-services\.json|GoogleService-Info\.plist)$|firebase-adminsdk.*\.json$|\.(pem|key|jks|keystore|p12)$|(^|/)\.env$' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::These files must never be committed (secrets policy):"; echo "$bad"; exit 1
+          fi
+          if git grep -nE '"private_key"|BEGIN (RSA |EC )?PRIVATE KEY' -- . ':!*.md'; then
+            echo "::error::A private key is committed (secrets policy)"; exit 1
+          fi
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
