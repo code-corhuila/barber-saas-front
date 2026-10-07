@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { IonApp, IonContent, IonFooter, IonIcon } from '@ionic/angular/standalone';
@@ -8,7 +8,9 @@ import {
 } from 'ionicons/icons';
 import { filter, map } from 'rxjs';
 import { SessionService } from './core/auth/session.service';
+import { apiClient } from './core/http/api-client';
 import { listenToBackButton } from './core/native/back-button';
+import { devicePush, pushAvailable } from './core/native/push';
 import { tabsFor } from './layout/navigation';
 
 /**
@@ -67,5 +69,19 @@ export class AppComponent {
       business, calendar, cut, gift, heart, logOut, notifications, person, search, 'stats-chart': statsChart, time,
     });
     listenToBackButton();
+    if (pushAvailable()) {
+      // Each sign-in registers this device for whoever is using it now (F-4).
+      const push = devicePush(apiClient, () => void this.router.navigateByUrl('/notifications'));
+      let registeredFor: string | null = null;
+      effect(() => {
+        const userId = this.session.user()?.id ?? null;
+        if (userId && userId !== registeredFor) {
+          registeredFor = userId;
+          void push.enable();
+        } else if (!userId) {
+          registeredFor = null;
+        }
+      });
+    }
   }
 }
