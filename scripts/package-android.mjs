@@ -53,9 +53,14 @@ for (const name of Object.keys(remotes)) {
 writeFileSync(join(web, 'federation.manifest.json'), JSON.stringify(packaged, null, 2) + '\n');
 
 const index = join(web, 'index.html');
-const script = `<script>window.__BARBERSAAS_GATEWAY_URL__ = ${JSON.stringify(gateway)};</script>`;
+// Push only in a build that carries the developer's own Firebase file (never versioned): without
+// it the push plugin would crash the app, so the shell keeps the notices in the inbox only.
+const push = existsSync(join(root, 'android', 'app', 'google-services.json'));
+const script = `<script>window.__BARBERSAAS_GATEWAY_URL__ = ${JSON.stringify(gateway)};`
+  + ` window.__BARBERSAAS_PUSH__ = ${push};</script>`;
 writeFileSync(index, readFileSync(index, 'utf8').replace('</head>', `  ${script}\n</head>`));
 
 run('npx cap sync android', root);
-console.log(`\nPackaged ${Object.keys(packaged).join(', ')} with the gateway at ${gateway}.`);
+console.log(`\nPackaged ${Object.keys(packaged).join(', ')} with the gateway at ${gateway}`
+  + (push ? ', push on.' : ', push off (no android/app/google-services.json).'));
 console.log('Open it in Android Studio with: npx cap open android');
