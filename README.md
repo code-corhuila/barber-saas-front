@@ -85,6 +85,20 @@ the same Wi-Fi: `npm run android:package -- --gateway http://<PC IP>:8000`; the 
 override it in `localStorage['barbersaas.gatewayUrl']`. The app's origin is `http://localhost`, the
 one the gateway allows for Android (`androidScheme: 'http'` in `capacitor.config.ts`).
 
+### Push notifications (Firebase) — never versioned
+
+Push needs a Firebase project, and its files are **personal secrets of whoever owns that project**:
+`android/app/google-services.json` here and the service account (`FCM_SERVICE_ACCOUNT_JSON`) in
+`barber-saas-infra-postgres/env/<environment>.env`. They are **never committed, pushed, pasted in a pull
+request or shared**: `.gitignore` ignores them and the CI fails any pull request that carries one, even
+one forced with `git add -f`.
+
+Without `google-services.json`, `npm run android:package` builds the app with push off and every notice
+stays in the Avisos inbox — the normal setup for anyone without their own Firebase project. To test
+push, create **your own** Firebase project (Android package `co.edu.corhuila.barbersaas`), keep its files
+outside this repository and outside any folder synced to a cloud, and copy `google-services.json` into
+`android/app/` only while you build.
+
 ### Where the data is
 
 Only the session, in the device's `localStorage` (`barbersaas.session`). Everything else comes from
