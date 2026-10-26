@@ -34,6 +34,8 @@ export const NAVIGATION: NavigationItem[] = [
  */
 export const PROFILE_LINKS: NavigationItem[] = [
   { path: '/loyalty', label: 'Programa de fidelidad', icon: 'heart', roles: ['ADMIN_BARBERSHOP'] },
+  { path: '/profile/edit', label: 'Editar perfil', icon: 'create', roles: ['CLIENT', 'BARBER', 'ADMIN_BARBERSHOP', 'SUPER_ADMIN'] },
+  { path: '/profile/password', label: 'Cambiar contraseña', icon: 'key', roles: ['CLIENT', 'BARBER', 'ADMIN_BARBERSHOP', 'SUPER_ADMIN'] },
 ];
 
 export function profileLinksFor(role: Role | undefined): NavigationItem[] {
