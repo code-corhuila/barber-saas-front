@@ -64,4 +64,28 @@ describe('ApiClient', () => {
 
     await expect(api.get('https://elsewhere.example')).rejects.toThrow('/api/');
   });
+
+  it('renews an expiring session before the request and sends the new token', async () => {
+    let now = 0;
+    const store = new SessionStore(undefined, () => now);
+    store.signIn({ accessToken: 'old', refreshToken: 'r-1', expiresIn: 60,
+      user: { id: 'u', fullName: 'U', email: 'u@example.com', phone: null, profilePhotoUrl: null,
+        role: 'CLIENT', barbershopId: null, isActive: true } });
+    now = 30_000;
+    const calls: { url: string; init?: RequestInit }[] = [];
+    const fetchFn = (async (url: string, init?: RequestInit) => {
+      calls.push({ url, init });
+      return url.endsWith('/api/v1/auth/refresh')
+        ? new Response(JSON.stringify({ accessToken: 'new', refreshToken: 'r-2', expiresIn: 3600,
+            user: { id: 'u', fullName: 'U', email: 'u@example.com', phone: null, profilePhotoUrl: null,
+              role: 'CLIENT', barbershopId: null, isActive: true } }), { status: 200 })
+        : new Response('{}', { status: 200 });
+    }) as unknown as typeof fetch;
+
+    await new ApiClient(store, () => 'http://gw', fetchFn).get('/api/v1/appointments');
+
+    expect(calls[0].url).toBe('http://gw/api/v1/auth/refresh');
+    expect(JSON.parse(String(calls[0].init?.body))).toEqual({ refreshToken: 'r-1' });
+    expect((calls[1].init?.headers as Record<string, string>)['Authorization']).toBe('Bearer new');
+  });
 });
