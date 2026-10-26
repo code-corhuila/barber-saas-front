@@ -15,8 +15,9 @@ describe('navigation', () => {
     }
   });
 
-  it('opens the loyalty program from the owner profile, as in the prototype', () => {
-    expect(profileLinksFor('ADMIN_BARBERSHOP').map((l) => l.path)).toEqual(['/loyalty', '/profile/edit', '/profile/password']);
+  it('opens the plan, the reviews and the loyalty program from the owner profile', () => {
+    expect(profileLinksFor('ADMIN_BARBERSHOP').map((l) => l.path)).toEqual(
+      ['/profile/plan', '/appointments/reviews', '/loyalty', '/profile/edit', '/profile/password']);
     expect(profileLinksFor(undefined)).toEqual([]);
   });
 
