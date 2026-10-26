@@ -8,6 +8,8 @@ export interface SessionUser {
   role: 'SUPER_ADMIN' | 'ADMIN_BARBERSHOP' | 'BARBER' | 'CLIENT';
   barbershopId: string | null;
   isActive: boolean;
+  /** auth-service.yaml 3.0.0 (ADR-018). */
+  emailVerified?: boolean;
 }
 
 /** auth-service.yaml AuthResponse. */
@@ -29,9 +31,19 @@ export interface Session {
   accessToken: string;
   refreshToken: string;
   expiresAt: number;
+  /** The refresh token lives 7 days (HU-AUTH-005); the session can be renewed until then. */
+  refreshExpiresAt?: number;
   user: SessionUser;
   barbershop?: BarbershopBinding;
 }
+
+/** POST /api/v1/auth/refresh: the new tokens, or a rejection (an ApiError with its status). */
+export type Refresher = (refreshToken: string) => Promise<AuthResponse>;
+
+/** The refresh token's lifetime (auth-service.yaml: opaque, single use, valid 7 days). */
+const REFRESH_LIFETIME_MS = 7 * 24 * 3600 * 1000;
+/** Renew when the access token has less than this left, so no request leaves with an expired one. */
+export const RENEW_MARGIN_MS = 5 * 60 * 1000;
 
 type Listener = (session: Session | null) => void;
 
@@ -50,17 +62,45 @@ export class SessionStore {
     this.current = this.read();
   }
 
+  private renewing: Promise<void> | null = null;
+
+  /** The session while it can still be renewed; an older one is forgotten. */
   get(): Session | null {
-    if (this.current && this.current.expiresAt <= this.now()) {
+    if (this.current && (this.current.refreshExpiresAt ?? this.current.expiresAt) <= this.now()) {
       this.clear();
     }
     return this.current;
   }
 
-  /** The bound token while it is valid, else the login token: the one every request carries. */
+  /** The bound token while it is valid, else the login token while it is valid: the one every request carries. */
   token(): string | null {
     const session = this.get();
-    return this.binding()?.accessToken ?? session?.accessToken ?? null;
+    if (this.binding()) return this.binding()!.accessToken;
+    return session && session.expiresAt > this.now() ? session.accessToken : null;
+  }
+
+  /**
+   * Renews the tokens once the access token is about to expire (HU-AUTH-005). Concurrent callers share
+   * one renewal. A rejected refresh token (401) ends the session; a network failure keeps it for later.
+   */
+  async ensureFresh(refresh: Refresher): Promise<void> {
+    const session = this.get();
+    if (!session || session.expiresAt - RENEW_MARGIN_MS > this.now()) return;
+    this.renewing ??= refresh(session.refreshToken)
+      .then((auth) => this.renew(auth))
+      .catch((err: { status?: number }) => {
+        if (err?.status === 401 || err?.status === 403) this.clear();
+      })
+      .finally(() => { this.renewing = null; });
+    return this.renewing;
+  }
+
+  /** New tokens of the same session: the client's barbershop binding is kept. */
+  renew(auth: AuthResponse): void {
+    const current = this.get();
+    const next: Session = { ...this.fromAuth(auth), barbershop: current?.barbershop };
+    this.storage?.setItem(KEY, JSON.stringify(next));
+    this.set(next);
   }
 
   /** Staff: their own barbershop. Client: the one they entered, while its token is valid. */
@@ -89,15 +129,29 @@ export class SessionStore {
   }
 
   signIn(auth: AuthResponse): Session {
-    const session: Session = {
-      accessToken: auth.accessToken,
-      refreshToken: auth.refreshToken,
-      expiresAt: this.now() + auth.expiresIn * 1000,
-      user: auth.user,
-    };
+    const session = this.fromAuth(auth);
     this.storage?.setItem(KEY, JSON.stringify(session));
     this.set(session);
     return session;
+  }
+
+  /** The profile was edited (HU-AUTH-006): the same session shows the new name and phone. */
+  updateUser(user: SessionUser): void {
+    const current = this.get();
+    if (!current) return;
+    const next = { ...current, user };
+    this.storage?.setItem(KEY, JSON.stringify(next));
+    this.set(next);
+  }
+
+  private fromAuth(auth: AuthResponse): Session {
+    return {
+      accessToken: auth.accessToken,
+      refreshToken: auth.refreshToken,
+      expiresAt: this.now() + auth.expiresIn * 1000,
+      refreshExpiresAt: this.now() + REFRESH_LIFETIME_MS,
+      user: auth.user,
+    };
   }
 
   clear(): void {
