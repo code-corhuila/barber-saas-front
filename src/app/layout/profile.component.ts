@@ -2,6 +2,8 @@ import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { IonIcon } from '@ionic/angular/standalone';
 import { SessionService } from '../core/auth/session.service';
+import { barberLimit, money, shortDate } from '../account/account-api';
+import { PlanService } from '../account/plan.service';
 import { profileLinksFor, ROLE_BADGE } from './navigation';
 
 /** The prototype's profile tab: the user's initial, name, email and role, the role's sections and signing out. */
@@ -16,6 +18,22 @@ import { profileLinksFor, ROLE_BADGE } from './navigation';
         <p class="email">{{ user.email }}</p>
         <span class="badge" [style.color]="badge().color" [style.border-color]="badge().color">{{ badge().label }}</span>
       </header>
+      @if (plans.subscription(); as s) {
+        <a class="plan" routerLink="/profile/plan" [class.warn]="plans.state()?.warn">
+          <span class="plan-head"><strong>{{ s.plan?.name ?? 'Sin plan' }}</strong><span>{{ plans.state()?.label }}</span></span>
+          @if (s.plan) {
+            <span class="plan-line">{{ money(s.plan.priceCents) }} / mes · {{ barberLimit(s.plan.maxBarbers) }}</span>
+          }
+          @if (plans.state(); as st) {
+            @if (st.blocked) {
+              <span class="plan-line">Plan vencido: tu barbería no recibe reservas. Toca para pagar.</span>
+            } @else if (st.daysLeft !== null && st.endsAt) {
+              <span class="plan-line">{{ s.status === 'TRIAL' ? 'Te quedan ' + st.daysLeft + ' días de prueba gratis'
+                : 'Pagado hasta el ' + shortDate(st.endsAt) }} · vence el {{ shortDate(st.endsAt) }}</span>
+            }
+          }
+        </a>
+      }
       <section class="content">
         @for (link of links(); track link.path) {
           <a class="row" [routerLink]="link.path">
@@ -45,10 +63,21 @@ import { profileLinksFor, ROLE_BADGE } from './navigation';
            margin-bottom: 10px; }
     .row ion-icon { font-size: 20px; }
     .row.danger { border-color: #3a1e1e; color: var(--bs-danger); }
+    .plan { display: block; max-width: 40rem; margin: 16px auto 0; box-sizing: border-box; width: calc(100% - 32px);
+            background: var(--bs-card); border: 1px solid var(--bs-gold); border-radius: 12px; padding: 14px 16px;
+            color: var(--bs-text); text-decoration: none; }
+    .plan.warn { border-color: #ffcc66; }
+    .plan-head { display: flex; justify-content: space-between; color: var(--bs-gold); }
+    .plan-line { display: block; color: var(--bs-muted); font-size: 13px; margin-top: 6px; }
+    .plan.warn .plan-line:last-child { color: #ffcc66; }
   `,
 })
 export class ProfileComponent {
   readonly session = inject(SessionService);
+  readonly plans = inject(PlanService);
+  readonly money = money;
+  readonly barberLimit = barberLimit;
+  readonly shortDate = shortDate;
   private readonly router = inject(Router);
   readonly badge = computed(() => ROLE_BADGE[this.session.user()?.role ?? 'CLIENT']);
   readonly links = computed(() => profileLinksFor(this.session.user()?.role));
