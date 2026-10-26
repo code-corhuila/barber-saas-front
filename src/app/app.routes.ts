@@ -50,6 +50,8 @@ export const routes: Routes = [
       import('./account/edit-profile.component').then((m) => m.EditProfileComponent) },
   { path: 'profile/password', title: 'Cambiar contraseña', canActivate: [authGuard], loadComponent: () =>
       import('./account/change-password.component').then((m) => m.ChangePasswordComponent) },
+  { path: 'profile/plan', title: 'Mi plan', canActivate: [authGuard, roleGuard('ADMIN_BARBERSHOP')], loadComponent: () =>
+      import('./account/my-plan.component').then((m) => m.MyPlanComponent) },
   reactDomain('sign-in', 'identity-auth', 'Ingresar', false),
   reactDomain('barbershops', 'barbershop', 'Barberías'),
   reactDomain('schedule', 'schedule', 'Horarios'),
