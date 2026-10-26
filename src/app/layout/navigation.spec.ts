@@ -16,9 +16,12 @@ describe('navigation', () => {
   });
 
   it('opens the loyalty program from the owner profile, as in the prototype', () => {
-    expect(profileLinksFor('ADMIN_BARBERSHOP').map((l) => l.path)).toEqual(['/loyalty']);
-    expect(profileLinksFor('CLIENT')).toEqual([]);
+    expect(profileLinksFor('ADMIN_BARBERSHOP').map((l) => l.path)).toEqual(['/loyalty', '/profile/edit', '/profile/password']);
     expect(profileLinksFor(undefined)).toEqual([]);
+  });
+
+  it('lets every role edit the profile and change the password (HU-AUTH-006)', () => {
+    expect(profileLinksFor('CLIENT').map((l) => l.path)).toEqual(['/profile/edit', '/profile/password']);
   });
 
   it('has no tabs without a session', () => {
