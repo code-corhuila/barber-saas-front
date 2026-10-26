@@ -33,6 +33,8 @@ export const NAVIGATION: NavigationItem[] = [
  * in their profile, not in a tab), so the bottom bar keeps room on a phone.
  */
 export const PROFILE_LINKS: NavigationItem[] = [
+  { path: '/profile/plan', label: 'Mi plan y pagos', icon: 'card', roles: ['ADMIN_BARBERSHOP'] },
+  { path: '/appointments/reviews', label: 'Reseñas', icon: 'star', roles: ['ADMIN_BARBERSHOP'] },
   { path: '/loyalty', label: 'Programa de fidelidad', icon: 'heart', roles: ['ADMIN_BARBERSHOP'] },
   { path: '/profile/edit', label: 'Editar perfil', icon: 'create', roles: ['CLIENT', 'BARBER', 'ADMIN_BARBERSHOP', 'SUPER_ADMIN'] },
   { path: '/profile/password', label: 'Cambiar contraseña', icon: 'key', roles: ['CLIENT', 'BARBER', 'ADMIN_BARBERSHOP', 'SUPER_ADMIN'] },
