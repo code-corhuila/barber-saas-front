@@ -1,4 +1,4 @@
-import { SessionStore, sessionStore } from '../session/session-store';
+import { AuthResponse, Refresher, SessionStore, sessionStore } from '../session/session-store';
 import { gatewayUrl, TIMEOUT_MS } from './gateway';
 import { ApiError, toApiError } from './api-error';
 
@@ -46,6 +46,7 @@ export class ApiClient {
     if (!path.startsWith('/api/')) {
       throw new Error(`apiClient only calls the gateway: '${path}' must start with /api/`);
     }
+    await this.session.ensureFresh(refresher(this.baseUrl, this.fetchFn));
     const correlationId = crypto.randomUUID();
     const token = this.session.token();
     const headers: Record<string, string> = {
@@ -82,6 +83,24 @@ export class ApiClient {
     }
     return payload as T;
   }
+}
+
+/**
+ * POST /api/v1/auth/refresh straight through fetch (never through request(), which would wait for
+ * itself): the single-use refresh token gives a new pair of tokens (HU-AUTH-005).
+ */
+export function refresher(baseUrl: () => string = gatewayUrl,
+                          fetchFn: typeof fetch = (...args) => globalThis.fetch(...args)): Refresher {
+  return async (refreshToken) => {
+    const response = await fetchFn(baseUrl() + '/api/v1/auth/refresh', {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Correlation-Id': crypto.randomUUID() },
+      body: JSON.stringify({ refreshToken }),
+    });
+    const payload = await readJson(response);
+    if (!response.ok) throw toApiError(response.status, payload, response.headers.get('X-Correlation-Id'), '');
+    return payload as AuthResponse;
+  };
 }
 
 async function readJson(response: Response): Promise<unknown> {
