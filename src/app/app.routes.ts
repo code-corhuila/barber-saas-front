@@ -46,6 +46,10 @@ export const routes: Routes = [
       import('./layout/home.component').then((m) => m.HomeComponent) },
   { path: 'profile', title: 'Perfil', canActivate: [authGuard], loadComponent: () =>
       import('./layout/profile.component').then((m) => m.ProfileComponent) },
+  { path: 'profile/edit', title: 'Editar perfil', canActivate: [authGuard], loadComponent: () =>
+      import('./account/edit-profile.component').then((m) => m.EditProfileComponent) },
+  { path: 'profile/password', title: 'Cambiar contraseña', canActivate: [authGuard], loadComponent: () =>
+      import('./account/change-password.component').then((m) => m.ChangePasswordComponent) },
   reactDomain('sign-in', 'identity-auth', 'Ingresar', false),
   reactDomain('barbershops', 'barbershop', 'Barberías'),
   reactDomain('schedule', 'schedule', 'Horarios'),
