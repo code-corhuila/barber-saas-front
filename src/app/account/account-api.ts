@@ -70,6 +70,14 @@ export function planState(s: Subscription, now: Date = new Date()): PlanState {
   return { label, daysLeft, endsAt, warn: blocked || (daysLeft !== null && daysLeft <= 7), blocked };
 }
 
+/**
+ * Wompi's checkout is absolute; the simulated checkout of DEC-PLAT-08 is a gateway path, completed with
+ * the gateway this app already uses (laptop, emulator or deployed host).
+ */
+export function checkoutHref(checkoutUrl: string, gateway: string): string {
+  return checkoutUrl.startsWith('/') ? gateway + checkoutUrl : checkoutUrl;
+}
+
 /** COP from cents: 4990000 → "$49.900". */
 export function money(cents: number): string {
   return '$' + Math.round(cents / 100).toLocaleString('es-CO');
