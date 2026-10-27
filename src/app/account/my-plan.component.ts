@@ -1,8 +1,9 @@
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { apiClient, type ApiError } from '../core/http/api-client';
+import { gatewayUrl } from '../core/http/gateway';
 import {
-  accountApi, barberLimit, money, PAYMENT_LABEL, shortDate, type Payment, type Plan,
+  accountApi, barberLimit, checkoutHref, money, PAYMENT_LABEL, shortDate, type Payment, type Plan,
 } from './account-api';
 import { ACCOUNT_STYLES } from './account.styles';
 import { PlanService } from './plan.service';
@@ -47,7 +48,7 @@ import { PlanService } from './plan.service';
       }
 
       <h2>Elige o renueva tu plan</h2>
-      <p class="muted">El pago se hace en Wompi en modo de prueba: usa las tarjetas de prueba, no se cobra dinero real.</p>
+      <p class="muted">Pago en modo de prueba: no se cobra dinero real.</p>
       @for (p of available(); track p.id) {
         <button type="button" class="card option" [class.on]="p.id === chosen()" (click)="chosen.set(p.id)">
           <span class="row"><strong>{{ p.name }}</strong><span class="gold">{{ money(p.priceCents) }} / mes</span></span>
@@ -138,7 +139,7 @@ export class MyPlanComponent implements OnInit, OnDestroy {
     try {
       const { checkoutUrl } = await accountApi.startPayment(apiClient, planId, this.key.value);
       this.key = { planId: '', value: '' };
-      window.open(checkoutUrl, '_blank');
+      window.open(checkoutHref(checkoutUrl, gatewayUrl()), '_blank');
     } catch (err) {
       this.payError.set((err as ApiError).userMessage ?? 'No se pudo iniciar el pago.');
     } finally {
