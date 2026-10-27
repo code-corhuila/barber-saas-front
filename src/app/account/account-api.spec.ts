@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { barberLimit, money, planState, type Subscription } from './account-api';
+import { barberLimit, checkoutHref, money, planState, type Subscription } from './account-api';
 
 const base: Subscription = {
   barbershopId: 'b', status: 'TRIAL', plan: null, trialEndsAt: '2026-11-20T15:00:00Z', paidUntil: null,
@@ -28,5 +28,13 @@ describe('formats', () => {
     expect(money(4_990_000).replace(/\s/g, '')).toMatch(/^\$49[.,]900$/);
     expect(barberLimit(2)).toBe('Hasta 2 barberos');
     expect(barberLimit(999)).toBe('Barberos ilimitados');
+  });
+});
+
+describe('checkoutHref', () => {
+  it('completes the simulated checkout with the gateway and keeps Wompi as it is', () => {
+    expect(checkoutHref('/api/v1/payments/simulator/BS-1', 'http://10.0.2.2:8000'))
+      .toBe('http://10.0.2.2:8000/api/v1/payments/simulator/BS-1');
+    expect(checkoutHref('https://checkout.wompi.co/p/?x=1', 'http://gw')).toBe('https://checkout.wompi.co/p/?x=1');
   });
 });
