@@ -4,6 +4,26 @@ All notable changes to `barber-saas-front` are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-11-05
+
+MVP 3 (corte 3): promoted from `develop` through `qa` with `git cherry-pick -x` (norm 10–11).
+
+User stories: code-corhuila/barber-saas-docs#124, code-corhuila/barber-saas-docs#125, code-corhuila/barber-saas-docs#126, code-corhuila/barber-saas-docs#127.
+
+### Added
+
+- **session:** renew the tokens before they expire and keep the barbershop binding
+- **http:** renew the session before every request
+- **auth:** revoke the refresh token when signing out
+- **account:** add the calls and formats of the account screens
+- **account:** edit the profile and change the password
+- **navigation:** open the account screens from the profile
+- **plan:** read the owner's subscription once per sign-in
+- **plan:** show the plan and the payments and pay a plan in Wompi's checkout
+- **plan:** show the plan card on the profile and warn the owner before it ends
+- **plan:** open the simulated checkout through the gateway
+- **android:** brand the launcher icon and the splash screen with the BarberSaaS logo
+
 ## [2.0.0] - 2026-10-08
 
 MVP 2 (corte 2): first release of this repository to `main`, promoted from `develop` through `qa`
@@ -91,4 +111,5 @@ User stories: code-corhuila/barber-saas-docs#3, code-corhuila/barber-saas-docs#4
 - refuse Firebase files and keys in any pull request
 - skip the workflow's own pattern and print only file names
 
+[3.0.0]: https://github.com/code-corhuila/barber-saas-front/releases/tag/v3.0.0
 [2.0.0]: https://github.com/code-corhuila/barber-saas-front/releases/tag/v2.0.0
